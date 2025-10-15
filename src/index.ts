@@ -200,6 +200,31 @@ const tools: Tool[] = [
     },
   },
   {
+    name: 'list_issue_statuses',
+    description: 'List all available issue statuses',
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'check_my_issues',
+    description: 'Check issues assigned to the current user. If status_id is not provided, will list available statuses for you to choose from.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        status_id: {
+          type: 'string',
+          description: 'Filter by status ID (use "open" for all open statuses, "closed" for closed, "*" for all, or specific status name)',
+        },
+        limit: {
+          type: 'number',
+          description: 'Maximum number of tasks to return (default: 25)',
+        },
+      },
+    },
+  },
+  {
     name: 'list_projects',
     description: 'List all available projects',
     inputSchema: {
@@ -503,6 +528,66 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: `Available time entry activities:\n\n${activityList}`,
+            },
+          ],
+        };
+      }
+
+      case 'list_issue_statuses': {
+        const statuses = await redmineClient.listIssueStatuses();
+        const statusList = statuses.issue_statuses.map((status: any) =>
+          `${status.id}: ${status.name}${status.is_default ? ' (default)' : ''}${status.is_closed ? ' [Closed]' : ' [Open]'}`
+        ).join('\n');
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Available issue statuses:\n\n${statusList}\n\nYou can also use:\n- "open" for all open statuses\n- "closed" for all closed statuses\n- "*" for all statuses`,
+            },
+          ],
+        };
+      }
+
+      case 'check_my_issues': {
+        // Get current user
+        const user = await redmineClient.getCurrentUser();
+        const userId = user.user.id;
+
+        // If status_id is not provided, list available statuses and prompt
+        if (!(args as any).status_id) {
+          const statuses = await redmineClient.listIssueStatuses();
+          const statusList = statuses.issue_statuses.map((status: any) =>
+            `${status.id}: ${status.name}${status.is_default ? ' (default)' : ''}${status.is_closed ? ' [Closed]' : ' [Open]'}`
+          ).join('\n');
+
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Please specify a status_id to filter your issues.\n\nAvailable issue statuses:\n\n${statusList}\n\nYou can also use:\n- "open" for all open statuses\n- "closed" for all closed statuses
+- "*" for all statuses\n\nExample: Use check_my_issues with status_id parameter set to "open" to see all your open issues.`,
+              },
+            ],
+          };
+        }
+
+        // Fetch issues for current user with specified status
+        const issues = await redmineClient.listIssues({
+          assigned_to_id: userId,
+          status_id: (args as any).status_id,
+          limit: (args as any).limit || 25,
+        });
+
+        const taskList = issues.issues.map((issue: any) =>
+          `#${issue.id}: ${issue.subject} [${issue.status.name}]`
+        ).join('\n');
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Found ${issues.total_count} issues assigned to ${user.user.login} (showing ${issues.issues.length}):\n\n${taskList}`,
             },
           ],
         };

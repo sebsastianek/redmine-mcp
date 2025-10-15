@@ -166,4 +166,12 @@ export class RedmineClient {
     const response = await this.client.get('/enumerations/time_entry_activities.json');
     return response.data;
   }
+
+  /**
+   * List all issue statuses
+   */
+  async listIssueStatuses(): Promise<any> {
+    const response = await this.client.get('/issue_statuses.json');
+    return response.data;
+  }
 }
