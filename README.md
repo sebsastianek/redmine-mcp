@@ -24,6 +24,8 @@ Perfect for developers using Claude Code, Claude Desktop, or other MCP-compatibl
 - ⏱️ **Time Tracking**: Log hours with detailed comments and activity types
 - 🔍 **Smart Queries**: Filter tasks by project, assignee, status
 - 👤 **User Info**: Fetch current user and project details
+- 📊 **Status Management**: List and filter by available issue statuses
+- ✅ **My Issues**: Quick access to your assigned tasks with status filtering
 
 ### Developer Experience
 - 🎯 **Context Awareness**: Set current project/task to avoid repetitive ID specifications
@@ -34,8 +36,9 @@ Perfect for developers using Claude Code, Claude Desktop, or other MCP-compatibl
 ### Use Cases
 - Create tasks while reviewing code
 - Log time as you work on features
-- Check your task list during daily standups
+- Check your assigned issues during daily standups
 - Update task status as you progress through development
+- View available statuses to understand your workflow
 
 ## 📦 Installation
 
@@ -105,8 +108,8 @@ Do this:
 
 ```bash
 # Morning standup
-You: "What are my open tasks?"
-Claude: Shows your assigned tasks
+You: "Check my issues with status open"
+Claude: Shows your assigned open tasks
 
 # Start working
 You: "Set task #1234 as current"
@@ -195,6 +198,39 @@ Available time entry activities:
 10: Design
 11: Testing (default)
 ```
+
+### list_issue_statuses
+List all available issue statuses.
+
+**Parameters**: None
+
+**Returns**: List of statuses with their IDs and names, marking default and indicating if closed or open.
+
+**Example output**:
+```
+Available issue statuses:
+
+1: New (default) [Open]
+2: In Progress [Open]
+3: Resolved [Open]
+4: Feedback [Open]
+5: Closed [Closed]
+6: Rejected [Closed]
+
+You can also use:
+- "open" for all open statuses
+- "closed" for all closed statuses
+- "*" for all statuses
+```
+
+### check_my_issues
+Check issues assigned to the current user.
+
+**Parameters**:
+- `status_id`: Filter by status ID (use "open" for all open statuses, "closed" for closed, "*" for all)
+- `limit`: Maximum results (default: 25)
+
+**Note**: If `status_id` is not provided, the tool will list available statuses for you to choose from.
 
 ### list_tasks
 List tasks with optional filters.
