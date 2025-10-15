@@ -22,6 +22,7 @@ Perfect for developers using Claude Code, Claude Desktop, or other MCP-compatibl
 ### Core Functionality
 - 📝 **Task Management**: Create, read, update tasks with full field support
 - ⏱️ **Time Tracking**: Log hours with detailed comments and activity types
+- 📅 **Daily Summary**: View all time entries logged today with totals
 - 🔍 **Smart Queries**: Filter tasks by project, assignee, status
 - 👤 **User Info**: Fetch current user and project details
 - 📊 **Status Management**: List and filter by available issue statuses
@@ -37,6 +38,7 @@ Perfect for developers using Claude Code, Claude Desktop, or other MCP-compatibl
 - Create tasks while reviewing code
 - Log time as you work on features
 - Check your assigned issues during daily standups
+- View your daily time summary at end of day
 - Update task status as you progress through development
 - View available statuses to understand your workflow
 
@@ -246,6 +248,27 @@ Get all time entries for a specific task.
 
 **Parameters**:
 - `issue_id`: The task ID (uses current task if not specified)
+
+### get_today_time_entries
+Get all time entries logged today by the current user.
+
+**Parameters**: None
+
+**Returns**: Summary of today's time entries grouped by issue, with total hours.
+
+**Example output**:
+```
+Time entries for 2025-10-15:
+
+Issue #1234: 3.5h
+  - 2h (Development): Implementing OAuth flow
+  - 1.5h (Development): Code review fixes
+
+Issue #1235: 1h
+  - 1h (Testing): Writing unit tests
+
+Total hours today: 4.5h
+```
 
 ### list_projects
 List all available projects (no parameters required).

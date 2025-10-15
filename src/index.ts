@@ -192,6 +192,14 @@ const tools: Tool[] = [
     },
   },
   {
+    name: 'get_today_time_entries',
+    description: 'Get all time entries logged today by the current user.',
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
     name: 'list_activities',
     description: 'List all available time entry activities',
     inputSchema: {
@@ -512,6 +520,61 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: JSON.stringify(timeEntries, null, 2),
+            },
+          ],
+        };
+      }
+
+      case 'get_today_time_entries': {
+        const timeEntries = await redmineClient.getTodayTimeEntries();
+
+        if (timeEntries.time_entries.length === 0) {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: 'No time entries logged today.',
+              },
+            ],
+          };
+        }
+
+        const today = new Date().toISOString().split('T')[0];
+        let totalHours = 0;
+        const entriesByIssue: { [key: number]: any[] } = {};
+
+        // Group entries by issue and calculate total
+        timeEntries.time_entries.forEach((entry: any) => {
+          totalHours += entry.hours;
+          const issueId = entry.issue.id;
+          if (!entriesByIssue[issueId]) {
+            entriesByIssue[issueId] = [];
+          }
+          entriesByIssue[issueId].push(entry);
+        });
+
+        // Format output
+        let output = `Time entries for ${today}:\n\n`;
+
+        Object.keys(entriesByIssue).forEach((issueId) => {
+          const entries = entriesByIssue[parseInt(issueId)];
+          const issueHours = entries.reduce((sum, e) => sum + e.hours, 0);
+          const issueSubject = entries[0].issue.id;
+
+          output += `Issue #${issueId}: ${issueHours}h\n`;
+          entries.forEach((entry: any) => {
+            output += `  - ${entry.hours}h (${entry.activity.name})${entry.comments ? `: ${entry.comments}` : ''}\n`;
+          });
+          output += '\n';
+        });
+
+        output += `Total hours today: ${totalHours}h`;
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: output,
             },
           ],
         };

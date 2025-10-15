@@ -103,6 +103,20 @@ export class RedmineClient {
   }
 
   /**
+   * Get time entries for today (current user)
+   */
+  async getTodayTimeEntries(): Promise<any> {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    const response = await this.client.get('/time_entries.json', {
+      params: {
+        spent_on: today,
+        user_id: 'me'
+      },
+    });
+    return response.data;
+  }
+
+  /**
    * List issues with optional filters
    */
   async listIssues(params?: {
