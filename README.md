@@ -61,33 +61,16 @@ npm run build
 4. Click **Show** to reveal your key
 5. Copy the API key for the next step
 
-### 3. Configure with Claude Code (Recommended)
-
-**Global Configuration** (available in all projects):
+### 3. Configure with Claude Code
 
 ```bash
-claude mcp add --transport stdio -g redmine \
-  --env REDMINE_URL=https://your-redmine-instance.com \
-  --env REDMINE_API_KEY=your_api_key_here \
-  -- node /absolute/path/to/redmine-mcp/build/index.js
-```
-
-**Local Configuration** (project-specific):
-
-```bash
-cd /path/to/your/project
 claude mcp add --transport stdio redmine \
   --env REDMINE_URL=https://your-redmine-instance.com \
   --env REDMINE_API_KEY=your_api_key_here \
   -- node /absolute/path/to/redmine-mcp/build/index.js
 ```
 
-**Verify Installation:**
-
-```bash
-claude mcp list
-# Should show: redmine: ✓ Connected
-```
+Verify with: `claude mcp list`
 
 ## 🎯 Keep Context
 
