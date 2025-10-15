@@ -154,8 +154,10 @@ Create a new task (issue) in Redmine.
 - `tracker_id`: Tracker type (e.g., 1=Bug, 2=Feature)
 - `status_id`: Initial status
 - `priority_id`: Priority level
-- `assigned_to_id`: Assign to user ID
+- `assigned_to_id`: Assign to user ID (defaults to current user if not specified)
 - `estimated_hours`: Estimated time for completion
+
+**Note**: Tasks are automatically assigned to the current user unless a different assignee is specified.
 
 ### get_task
 Get detailed information about a specific task.

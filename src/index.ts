@@ -355,6 +355,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           };
         }
 
+        // If no assignee specified, assign to current user
+        let assignedToId = (args as any).assigned_to_id;
+        if (!assignedToId) {
+          const user = await redmineClient.getCurrentUser();
+          assignedToId = user.user.id;
+        }
+
         const issue = await redmineClient.createIssue({
           project_id: projectId,
           subject: (args as any).subject,
@@ -362,7 +369,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           tracker_id: (args as any).tracker_id,
           status_id: (args as any).status_id,
           priority_id: (args as any).priority_id,
-          assigned_to_id: (args as any).assigned_to_id,
+          assigned_to_id: assignedToId,
           estimated_hours: (args as any).estimated_hours,
         });
         return {
