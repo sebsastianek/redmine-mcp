@@ -250,13 +250,13 @@ const tools: Tool[] = [
   },
   {
     name: 'set_current_project',
-    description: 'Set the current project context (will be used as default for operations)',
+    description: 'Set the current project context (will be used as default for operations). IMPORTANT: You MUST call list_projects first to fetch available projects and validate that the project exists before calling this tool. Never call this tool without first verifying the project is in the available project list.',
     inputSchema: {
       type: 'object',
       properties: {
         project_id: {
           type: ['number', 'string'],
-          description: 'Project ID or identifier to set as current',
+          description: 'Project ID or identifier to set as current (must be from the list_projects results)',
         },
       },
       required: ['project_id'],
@@ -692,18 +692,34 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case 'set_current_project': {
-        // Fetch project details to confirm it exists and get the numeric ID
-        const project = await redmineClient.getProject((args as any).project_id);
-        // Always store the numeric ID, not the slug
-        stateManager.setCurrentProject(project.project.id);
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Current project set to: ${project.project.name} (ID: ${project.project.id})`,
-            },
-          ],
-        };
+        try {
+          // Fetch project details to confirm it exists and get the numeric ID
+          const project = await redmineClient.getProject((args as any).project_id);
+          // Always store the numeric ID, not the slug
+          stateManager.setCurrentProject(project.project.id);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Current project set to: ${project.project.name} (ID: ${project.project.id})`,
+              },
+            ],
+          };
+        } catch (error: any) {
+          // If project not found, provide helpful error message
+          if (error.response?.status === 404) {
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `Error: Project '${(args as any).project_id}' not found.\n\nREMINDER: You should call list_projects first to see available projects and ensure the project exists before calling set_current_project.`,
+                },
+              ],
+              isError: true,
+            };
+          }
+          throw error; // Re-throw other errors to be handled by outer catch
+        }
       }
 
       case 'get_current_project': {
